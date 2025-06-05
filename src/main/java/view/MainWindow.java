@@ -4,11 +4,15 @@
  */
 package view;
 
+import controller.ComponentController;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 import util.DatabaseConnection;
@@ -19,7 +23,7 @@ import util.DatabaseConnection;
  */
 public class MainWindow extends javax.swing.JFrame {
 
-    private static final int ROWS_PER_PAGE = 15; // Número de filas por página
+    private static final int ROWS_PER_PAGE = 14; // Número de filas por página
     private int currentPage = 0;
 
     /**
@@ -29,6 +33,7 @@ public class MainWindow extends javax.swing.JFrame {
         initComponents();
         initPaginationControls();
         loadData();
+
     }
 
     /**
@@ -71,6 +76,11 @@ public class MainWindow extends javax.swing.JFrame {
         table = new javax.swing.JTable();
         prevButton = new javax.swing.JButton();
         nextButton = new javax.swing.JButton();
+        ButtonsPane = new javax.swing.JPanel();
+        saveButton = new javax.swing.JButton();
+        deleteButton = new javax.swing.JButton();
+        resetButton = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jmAddUser = new javax.swing.JMenuItem();
@@ -400,10 +410,50 @@ public class MainWindow extends javax.swing.JFrame {
 
         AllPane.add(TablePane, java.awt.BorderLayout.PAGE_START);
 
+        saveButton.setText("Save edit");
+
+        deleteButton.setText("Delete build");
+
+        resetButton.setText("Discard changes");
+
+        jButton1.setText("Generate report");
+
+        javax.swing.GroupLayout ButtonsPaneLayout = new javax.swing.GroupLayout(ButtonsPane);
+        ButtonsPane.setLayout(ButtonsPaneLayout);
+        ButtonsPaneLayout.setHorizontalGroup(
+            ButtonsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(ButtonsPaneLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(saveButton)
+                .addGap(18, 18, 18)
+                .addComponent(deleteButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addGap(18, 18, 18)
+                .addComponent(resetButton)
+                .addContainerGap())
+        );
+        ButtonsPaneLayout.setVerticalGroup(
+            ButtonsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(ButtonsPaneLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(ButtonsPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(saveButton)
+                    .addComponent(deleteButton)
+                    .addComponent(resetButton)
+                    .addComponent(jButton1))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         jMenu1.setText("Options");
 
         jmAddUser.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_U, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         jmAddUser.setText("Add new user");
+        jmAddUser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmAddUserActionPerformed(evt);
+            }
+        });
         jMenu1.add(jmAddUser);
 
         jmAddPC.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_DOWN_MASK));
@@ -412,6 +462,11 @@ public class MainWindow extends javax.swing.JFrame {
 
         jmComponent.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_B, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         jmComponent.setText("Add new Component");
+        jmComponent.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmComponentActionPerformed(evt);
+            }
+        });
         jMenu1.add(jmComponent);
 
         jmClear.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ESCAPE, 0));
@@ -453,8 +508,12 @@ public class MainWindow extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(AllPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(AllPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(ButtonsPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -462,6 +521,8 @@ public class MainWindow extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(AllPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(ButtonsPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -507,6 +568,16 @@ public class MainWindow extends javax.swing.JFrame {
             loadData();
         }
     }//GEN-LAST:event_prevButtonActionPerformed
+
+    private void jmComponentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmComponentActionPerformed
+        AddComponentWindow addWindow = new AddComponentWindow(this); // 'this' es MainWindow
+        addWindow.setVisible(true); // Mostrar la ventana modal
+    }//GEN-LAST:event_jmComponentActionPerformed
+
+    private void jmAddUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmAddUserActionPerformed
+        NewUserWindow newUser = new NewUserWindow();
+        newUser.setVisible(true);
+    }//GEN-LAST:event_jmAddUserActionPerformed
 
     /**
      * @param args the command line arguments
@@ -604,6 +675,32 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }
 
+    private void cargarPagina(int pagina) {
+        try {
+            ComponentController controller = new ComponentController();
+            List<Map<String, Object>> cpus = controller.obtenerCpus(pagina);
+            DefaultTableModel model = (DefaultTableModel) table.getModel(); // Ajustado a tu variable "table"
+            model.setRowCount(0);
+            for (Map<String, Object> cpu : cpus) {
+                model.addRow(new Object[]{
+                    cpu.get("marca"),
+                    cpu.get("modelo"),
+                    cpu.get("nucleos"),
+                    cpu.get("hilos"),
+                    cpu.get("frecuencia"),
+                    cpu.get("socket"),
+                    cpu.get("año_lanzamiento"),
+                    cpu.get("consumo_energetico")
+                });
+            }
+            // Habilitar/deshabilitar botones de paginación
+            prevButton.setEnabled(pagina > 0);
+            nextButton.setEnabled(cpus.size() == 10); // Si hay 10 registros, puede haber más páginas
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar componentes: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void initPaginationControls() {
         // Crear panel para los botones de paginación
         JPanel paginationPanel = new JPanel();
@@ -626,6 +723,7 @@ public class MainWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AllPane;
     private javax.swing.JPanel BuildPane;
+    private javax.swing.JPanel ButtonsPane;
     private javax.swing.JPanel CPUPane;
     private javax.swing.JPanel ComponentsPane;
     private javax.swing.JPanel DiskPane;
@@ -635,6 +733,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel RAMPane;
     private javax.swing.JPanel TablePane;
     private javax.swing.JPanel UserPane;
+    private javax.swing.JButton deleteButton;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -663,6 +763,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem miGuide;
     private javax.swing.JButton nextButton;
     private javax.swing.JButton prevButton;
+    private javax.swing.JButton resetButton;
+    private javax.swing.JButton saveButton;
     private javax.swing.JTable table;
     // End of variables declaration//GEN-END:variables
 }

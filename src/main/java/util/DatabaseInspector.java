@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package util;
 
 import java.sql.Connection;
@@ -9,10 +5,11 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import util.DatabaseConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Clase para inspeccionar la estructura de una base de datos SQLite.
+ * Clase para inspeccionar la estructura y datos de una base de datos SQLite.
  */
 public class DatabaseInspector {
 
@@ -30,6 +27,7 @@ public class DatabaseInspector {
 
                 // Obtener columnas de la tabla usando PRAGMA table_info
                 System.out.println("Columnas:");
+                List<String> columnNames = new ArrayList<>();
                 try (PreparedStatement stmt = conn.prepareStatement("PRAGMA table_info(" + tableName + ");"); ResultSet columns = stmt.executeQuery()) {
                     while (columns.next()) {
                         String columnName = columns.getString("name");
@@ -38,6 +36,7 @@ public class DatabaseInspector {
                         String defaultValue = columns.getString("dflt_value");
                         boolean isPrimaryKey = columns.getInt("pk") == 1;
 
+                        columnNames.add(columnName);
                         System.out.printf("  - %s: %s, Not Null: %b, Default: %s, Primary Key: %b%n",
                                 columnName, columnType, notNull, defaultValue, isPrimaryKey);
                     }
@@ -56,6 +55,32 @@ public class DatabaseInspector {
                     }
                     if (!hasForeignKeys) {
                         System.out.println("  (Ninguna)");
+                    }
+                }
+
+                // Obtener y mostrar los datos de la tabla
+                System.out.println("Datos:");
+                try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM " + tableName)) {
+                    // Asegurarse de que no haya límite en el número de filas
+                    stmt.setMaxRows(0); // 0 significa sin límite
+                    ResultSet data = stmt.executeQuery();
+                    int rowCount = 0;
+                    while (data.next()) {
+                        rowCount++;
+                        StringBuilder rowData = new StringBuilder();
+                        for (int i = 0; i < columnNames.size(); i++) {
+                            String columnName = columnNames.get(i);
+                            Object value = data.getObject(i + 1);
+                            if (i > 0) {
+                                rowData.append(", ");
+                            }
+                            rowData.append(columnName).append(": ").append(value != null ? value.toString() : "NULL");
+                        }
+                        System.out.println("  Dato " + rowCount + ": " + rowData.toString());
+                    }
+                    System.out.println("  Total de registros procesados: " + rowCount);
+                    if (rowCount == 0) {
+                        System.out.println("  (Sin datos)");
                     }
                 }
             }

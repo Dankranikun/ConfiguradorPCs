@@ -4,6 +4,7 @@
  */
 package view;
 
+import controller.ComponentController;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
@@ -82,8 +83,9 @@ public class AddComponentWindow extends JDialog {
         super(parent, "Añadir componente", true); // true hace que sea modal
         setDefaultCloseOperation(DISPOSE_ON_CLOSE); // Cerrar y liberar recursos
         setLayout(new BorderLayout());
-        setSize(400, 450);
+        setSize(310, 450);
         setLocationRelativeTo(parent); // Centrar respecto a la ventana padre
+        setModal(true);
 
         cbItems = new JComboBox<>();
         cbItems.addItem("CPU");
@@ -224,7 +226,7 @@ public class AddComponentWindow extends JDialog {
         gbc.gridx = 0;
         gbc.gridy = 7;
         gbc.fill = GridBagConstraints.NONE;
-        panelCpu.add(new JLabel("Power Consumption (W):"), gbc);
+        panelCpu.add(new JLabel("Power (W):"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         cpuPowerField = new JTextField(15);
@@ -326,7 +328,7 @@ public class AddComponentWindow extends JDialog {
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.fill = GridBagConstraints.NONE;
-        panelGpu.add(new JLabel("Power Consumption (W):"), gbc);
+        panelGpu.add(new JLabel("Power (W):"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gpuPowerField = new JTextField(15);
@@ -503,46 +505,17 @@ public class AddComponentWindow extends JDialog {
     }
 
     private void saveCpu() throws SQLException {
-        String brand = cpuBrandField.getText().trim();
-        String model = cpuModelField.getText().trim();
-        String coresText = cpuCoresField.getText().trim();
-        String threadsText = cpuThreadsField.getText().trim();
-        String freqText = cpuFreqField.getText().trim();
-        String socket = cpuSocketField.getText().trim();
-        String yearText = cpuYearField.getText().trim();
-        String powerText = cpuPowerField.getText().trim();
-
-        if (brand.isEmpty() || model.isEmpty() || coresText.isEmpty() || threadsText.isEmpty() ||
-            freqText.isEmpty() || socket.isEmpty() || yearText.isEmpty() || powerText.isEmpty()) {
-            throw new IllegalArgumentException("Todos los campos son obligatorios.");
-        }
-
-        int cores, threads, year, power;
-        float frequency;
-        try {
-            cores = Integer.parseInt(coresText);
-            threads = Integer.parseInt(threadsText);
-            frequency = Float.parseFloat(freqText);
-            year = Integer.parseInt(yearText);
-            power = Integer.parseInt(powerText);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Cores, Threads, Frequency, Release Year y Power Consumption deben ser valores numéricos.");
-        }
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT INTO cpu (marca, modelo, nucleos, hilos, frecuencia, socket, año_lanzamiento, consumo_energetico) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
-            stmt.setString(1, brand);
-            stmt.setString(2, model);
-            stmt.setInt(3, cores);
-            stmt.setInt(4, threads);
-            stmt.setFloat(5, frequency);
-            stmt.setString(6, socket);
-            stmt.setInt(7, year);
-            stmt.setInt(8, power);
-            stmt.executeUpdate();
-        }
+        ComponentController controller = new ComponentController();
+        controller.insertarCpu(
+                cpuBrandField.getText().trim(),
+                cpuModelField.getText().trim(),
+                Integer.parseInt(cpuCoresField.getText().trim()),
+                Integer.parseInt(cpuThreadsField.getText().trim()),
+                Float.parseFloat(cpuFreqField.getText().trim()),
+                cpuSocketField.getText().trim(),
+                Integer.parseInt(cpuYearField.getText().trim()),
+                Integer.parseInt(cpuPowerField.getText().trim())
+        );
     }
 
     private void saveDisk() throws SQLException {
@@ -563,10 +536,9 @@ public class AddComponentWindow extends JDialog {
             throw new IllegalArgumentException("Storage debe ser un valor numérico.");
         }
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT INTO discos (marca, modelo, capacidad, tipo, conexion) " +
-                     "VALUES (?, ?, ?, ?, ?)")) {
+        try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO discos (marca, modelo, capacidad, tipo, conexion) "
+                + "VALUES (?, ?, ?, ?, ?)")) {
             stmt.setString(1, brand);
             stmt.setString(2, model);
             stmt.setInt(3, storage);
@@ -596,10 +568,9 @@ public class AddComponentWindow extends JDialog {
             throw new IllegalArgumentException("Memory, Release Year y Power Consumption deben ser valores numéricos.");
         }
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT INTO gpu (marca, modelo, memoria, año_lanzamiento, consumo_energetico) " +
-                     "VALUES (?, ?, ?, ?, ?)")) {
+        try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO gpu (marca, modelo, memoria, año_lanzamiento, consumo_energetico) "
+                + "VALUES (?, ?, ?, ?, ?)")) {
             stmt.setString(1, brand);
             stmt.setString(2, model);
             stmt.setInt(3, memory);
@@ -619,10 +590,9 @@ public class AddComponentWindow extends JDialog {
             throw new IllegalArgumentException("Todos los campos son obligatorios.");
         }
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT INTO motherboard (marca, modelo, chipset, socket) " +
-                     "VALUES (?, ?, ?, ?)")) {
+        try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO motherboard (marca, modelo, chipset, socket) "
+                + "VALUES (?, ?, ?, ?)")) {
             stmt.setString(1, brand);
             stmt.setString(2, model);
             stmt.setString(3, chipset);
@@ -648,10 +618,9 @@ public class AddComponentWindow extends JDialog {
             throw new IllegalArgumentException("Power debe ser un valor numérico.");
         }
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT INTO psu (marca, modelo, potencia, certificacion) " +
-                     "VALUES (?, ?, ?, ?)")) {
+        try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO psu (marca, modelo, potencia, certificacion) "
+                + "VALUES (?, ?, ?, ?)")) {
             stmt.setString(1, brand);
             stmt.setString(2, model);
             stmt.setInt(3, power);
@@ -679,10 +648,9 @@ public class AddComponentWindow extends JDialog {
             throw new IllegalArgumentException("Memory y Speed deben ser valores numéricos.");
         }
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT INTO ram (marca, modelo, capacidad, velocidad, socket) " +
-                     "VALUES (?, ?, ?, ?, ?)")) {
+        try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO ram (marca, modelo, capacidad, velocidad, socket) "
+                + "VALUES (?, ?, ?, ?, ?)")) {
             stmt.setString(1, brand);
             stmt.setString(2, model);
             stmt.setInt(3, memory);

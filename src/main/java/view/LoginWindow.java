@@ -24,6 +24,7 @@ public class LoginWindow extends javax.swing.JFrame {
      */
     public LoginWindow() {
         initComponents();
+        setLocationRelativeTo(null);
     }
 
     /**
