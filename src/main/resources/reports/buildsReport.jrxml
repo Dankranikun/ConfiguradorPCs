@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="buildsReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="57664728-8e29-4e10-af97-35863c04bfda">
+	<property name="ireport.zoom" value="2.357947691000002"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Title" fontName="Arial" fontSize="26" isBold="true" pdfFontName="Helvetica-Bold"/>
+	<style name="SubTitle" forecolor="#666666" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<field name="ID" class="java.lang.String"/>
+	<field name="User" class="java.lang.String"/>
+	<field name="CPU" class="java.lang.String"/>
+	<field name="Disk" class="java.lang.String"/>
+	<field name="GPU" class="java.lang.String"/>
+	<field name="MotherBoard" class="java.lang.String"/>
+	<field name="PSU" class="java.lang.String"/>
+	<field name="RAM" class="java.lang.String"/>
+	<group name="Group1">
+		<groupExpression><![CDATA[(int)($V{REPORT_COUNT}/15)]]></groupExpression>
+		<groupHeader>
+			<band height="23"/>
+		</groupHeader>
+		<groupFooter>
+			<band height="6"/>
+		</groupFooter>
+	</group>
+	<group name="Group2">
+		<groupExpression><![CDATA[(int)($V{REPORT_COUNT}/5)]]></groupExpression>
+		<groupHeader>
+			<band/>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="70" splitType="Stretch">
+			<staticText>
+				<reportElement style="Title" x="0" y="13" width="263" height="33" uuid="5c3df287-939c-4355-8c3a-53cd015844f3"/>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[Builded PCs]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="SubTitle" x="117" y="46" width="157" height="22" uuid="276c235c-97b4-42e1-aece-b12365db2c81"/>
+				<text><![CDATA[All of them]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="36" splitType="Stretch">
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="35" width="555" height="1" uuid="4bc74398-e721-44a1-9ad9-c5087c423ff3"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="0" y="1" width="35" height="20" uuid="10f51309-f0c0-4598-95c1-23c36f3b5eb6"/>
+				<text><![CDATA[ID]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="35" y="1" width="62" height="20" uuid="9072c90e-6a1a-4f02-be0c-e355404d4d0b"/>
+				<text><![CDATA[User]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="97" y="1" width="75" height="20" uuid="660f8d3e-48cf-4e11-a24a-e2457d23a900"/>
+				<text><![CDATA[CPU]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="247" y="0" width="75" height="20" uuid="cb43b424-a0b4-415a-90e2-17b35d4f3ffe"/>
+				<text><![CDATA[GPU]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="397" y="1" width="75" height="20" uuid="00e4a634-68e6-4bba-8476-76aaa28070cf"/>
+				<text><![CDATA[PSU]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="472" y="1" width="75" height="20" uuid="3fecb2a6-772f-40f5-8c21-70c8e9ffd7c6"/>
+				<text><![CDATA[RAM]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="172" y="1" width="75" height="20" uuid="73568768-bce3-4f52-8335-a9a1041051be"/>
+				<text><![CDATA[Disk]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="322" y="1" width="75" height="20" uuid="eea958be-b15f-4b7a-9121-662771ec713c"/>
+				<text><![CDATA[MotherBoard]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="35" height="20" uuid="87c4c86b-bfc1-4d0b-b2e6-c7cc41d0ad19"/>
+				<textFieldExpression><![CDATA[$F{ID}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="35" y="0" width="62" height="20" uuid="36f71c6d-c743-4441-bdb7-2336c78715e2"/>
+				<textFieldExpression><![CDATA[$F{User}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="97" y="0" width="75" height="20" uuid="066d969d-068c-447a-b0d2-624ef7c4a8c0"/>
+				<textFieldExpression><![CDATA[$F{CPU}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="172" y="0" width="75" height="20" uuid="24e05ee9-075f-40cb-8745-dd91738d02b9"/>
+				<textFieldExpression><![CDATA[$F{Disk}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="247" y="0" width="75" height="20" uuid="05e4bd6c-f358-4e07-bd27-5fad5b4909b0"/>
+				<textFieldExpression><![CDATA[$F{GPU}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="322" y="0" width="75" height="20" uuid="a0f4435a-6c39-4d14-8c54-f116fee86db5"/>
+				<textFieldExpression><![CDATA[$F{MotherBoard}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="397" y="0" width="75" height="20" uuid="2ae8528e-c783-42e4-89c4-80c3b4096fb4"/>
+				<textFieldExpression><![CDATA[$F{PSU}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="472" y="0" width="75" height="20" uuid="48ee7dd6-fc72-45b4-a1d7-2aa314322768"/>
+				<textFieldExpression><![CDATA[$F{RAM}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch">
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="3" width="555" height="1" uuid="aab666a7-d374-4687-a86e-73cc16369ace"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement style="Column header" x="433" y="0" width="80" height="20" uuid="437898b9-dcd6-4703-97e2-574d452d8491"/>
+				<textElement textAlignment="Right">
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement style="Column header" x="513" y="0" width="40" height="20" uuid="a67ec165-c863-48bb-b1af-f668c42189c4"/>
+				<textElement>
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement style="Column header" x="0" y="0" width="197" height="20" uuid="b2bb93b4-b35d-4a55-9f98-96624663d0c1"/>
+				<textElement>
+					<font size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

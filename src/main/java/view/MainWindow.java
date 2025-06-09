@@ -5,16 +5,39 @@
 package view;
 
 import controller.ComponentController;
+import dao.ReportDataSource;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.help.HelpBroker;
+import javax.help.HelpSet;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.table.DefaultTableModel;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.view.JasperViewer;
 import util.DatabaseConnection;
 
 /**
@@ -25,6 +48,8 @@ public class MainWindow extends javax.swing.JFrame {
 
     private static final int ROWS_PER_PAGE = 14; // Número de filas por página
     private int currentPage = 0;
+    private HelpSet helpSet;
+    private HelpBroker helpBroker;
 
     /**
      * Creates new form MainWindow
@@ -33,7 +58,36 @@ public class MainWindow extends javax.swing.JFrame {
         initComponents();
         initPaginationControls();
         loadData();
+        initHelp();
+        ejecutarF1();
 
+        // Agregar ListSelectionListener a la tabla
+        table.getSelectionModel().addListSelectionListener(event -> {
+            if (!event.getValueIsAdjusting()) { // Evitar múltiples eventos durante la selección
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow != -1) { // Verificar que hay una fila seleccionada
+                    // Obtener los datos de la fila seleccionada (ajustar índices según loadData())
+                    Object idObj = table.getValueAt(selectedRow, 0); // "ID"
+                    String usuario = (String) table.getValueAt(selectedRow, 1); // "Usuario"
+                    String ram = (String) table.getValueAt(selectedRow, 2);     // "RAM"
+                    String cpu = (String) table.getValueAt(selectedRow, 3);     // "CPU"
+                    String gpu = (String) table.getValueAt(selectedRow, 4);     // "GPU"
+                    String motherboard = (String) table.getValueAt(selectedRow, 5); // "Motherboard"
+                    String psu = (String) table.getValueAt(selectedRow, 6);     // "PSU"
+                    String disco = (String) table.getValueAt(selectedRow, 7);   // "Disco"
+
+                    // Asignar los valores a los campos de texto renombrados
+                    tfBuild.setText(idObj != null ? idObj.toString() : "");    // "ID" como identificador de Build
+                    tfUser.setText(usuario != null ? usuario : "");            // "Usuario" como User
+                    tfRam.setText(ram != null ? ram : "");                    // "RAM"
+                    tfCpu.setText(cpu != null ? cpu : "");                    // "CPU"
+                    tfGpu.setText(gpu != null ? gpu : "");                    // "GPU"
+                    tfMobo.setText(motherboard != null ? motherboard : "");    // "Motherboard"
+                    tfPsu.setText(psu != null ? psu : "");                    // "PSU"
+                    tfDisk.setText(disco != null ? disco : "");               // "Disco"
+                }
+            }
+        });
     }
 
     /**
@@ -49,28 +103,28 @@ public class MainWindow extends javax.swing.JFrame {
         ComponentsPane = new javax.swing.JPanel();
         BuildPane = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        tfBuild = new javax.swing.JTextField();
         UserPane = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        tfUser = new javax.swing.JTextField();
         RAMPane = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
-        jTextField3 = new javax.swing.JTextField();
+        tfRam = new javax.swing.JTextField();
         CPUPane = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
-        jTextField5 = new javax.swing.JTextField();
+        tfCpu = new javax.swing.JTextField();
         GPUPane = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
-        jTextField6 = new javax.swing.JTextField();
+        tfGpu = new javax.swing.JTextField();
         MoBoPane = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
-        jTextField7 = new javax.swing.JTextField();
+        tfMobo = new javax.swing.JTextField();
         PSUPane = new javax.swing.JPanel();
         jLabel8 = new javax.swing.JLabel();
-        jTextField8 = new javax.swing.JTextField();
+        tfPsu = new javax.swing.JTextField();
         DiskPane = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
-        jTextField9 = new javax.swing.JTextField();
+        tfDisk = new javax.swing.JTextField();
         TablePane = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         table = new javax.swing.JTable();
@@ -80,7 +134,7 @@ public class MainWindow extends javax.swing.JFrame {
         saveButton = new javax.swing.JButton();
         deleteButton = new javax.swing.JButton();
         resetButton = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        reportButton = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jmAddUser = new javax.swing.JMenuItem();
@@ -102,9 +156,9 @@ public class MainWindow extends javax.swing.JFrame {
 
         jLabel1.setText("Build⤵");
 
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+        tfBuild.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
+                tfBuildActionPerformed(evt);
             }
         });
 
@@ -118,7 +172,7 @@ public class MainWindow extends javax.swing.JFrame {
                     .addGroup(BuildPaneLayout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
+                    .addComponent(tfBuild, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
                 .addContainerGap())
         );
         BuildPaneLayout.setVerticalGroup(
@@ -127,7 +181,7 @@ public class MainWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tfBuild, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -148,7 +202,7 @@ public class MainWindow extends javax.swing.JFrame {
                     .addGroup(UserPaneLayout.createSequentialGroup()
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jTextField2, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
+                    .addComponent(tfUser, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
                 .addContainerGap())
         );
         UserPaneLayout.setVerticalGroup(
@@ -157,7 +211,7 @@ public class MainWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tfUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -168,9 +222,9 @@ public class MainWindow extends javax.swing.JFrame {
 
         jLabel3.setText("RAM⤵");
 
-        jTextField3.addActionListener(new java.awt.event.ActionListener() {
+        tfRam.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField3ActionPerformed(evt);
+                tfRamActionPerformed(evt);
             }
         });
 
@@ -184,7 +238,7 @@ public class MainWindow extends javax.swing.JFrame {
                     .addGroup(RAMPaneLayout.createSequentialGroup()
                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jTextField3, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
+                    .addComponent(tfRam, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
                 .addContainerGap())
         );
         RAMPaneLayout.setVerticalGroup(
@@ -193,7 +247,7 @@ public class MainWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tfRam, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -214,7 +268,7 @@ public class MainWindow extends javax.swing.JFrame {
                     .addGroup(CPUPaneLayout.createSequentialGroup()
                         .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jTextField5, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
+                    .addComponent(tfCpu, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
                 .addContainerGap())
         );
         CPUPaneLayout.setVerticalGroup(
@@ -223,7 +277,7 @@ public class MainWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tfCpu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -244,7 +298,7 @@ public class MainWindow extends javax.swing.JFrame {
                     .addGroup(GPUPaneLayout.createSequentialGroup()
                         .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jTextField6, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
+                    .addComponent(tfGpu, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE))
                 .addContainerGap())
         );
         GPUPaneLayout.setVerticalGroup(
@@ -253,7 +307,7 @@ public class MainWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tfGpu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -271,7 +325,7 @@ public class MainWindow extends javax.swing.JFrame {
             .addGroup(MoBoPaneLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(MoBoPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTextField7)
+                    .addComponent(tfMobo)
                     .addGroup(MoBoPaneLayout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addGap(0, 87, Short.MAX_VALUE)))
@@ -283,7 +337,7 @@ public class MainWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tfMobo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -301,7 +355,7 @@ public class MainWindow extends javax.swing.JFrame {
             .addGroup(PSUPaneLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(PSUPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTextField8)
+                    .addComponent(tfPsu)
                     .addGroup(PSUPaneLayout.createSequentialGroup()
                         .addComponent(jLabel8)
                         .addGap(0, 136, Short.MAX_VALUE)))
@@ -313,7 +367,7 @@ public class MainWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tfPsu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -331,7 +385,7 @@ public class MainWindow extends javax.swing.JFrame {
             .addGroup(DiskPaneLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(DiskPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTextField9, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
+                    .addComponent(tfDisk, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
                     .addGroup(DiskPaneLayout.createSequentialGroup()
                         .addComponent(jLabel9)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -343,7 +397,7 @@ public class MainWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jTextField9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tfDisk, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -416,7 +470,12 @@ public class MainWindow extends javax.swing.JFrame {
 
         resetButton.setText("Discard changes");
 
-        jButton1.setText("Generate report");
+        reportButton.setText("Generate report");
+        reportButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                reportButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout ButtonsPaneLayout = new javax.swing.GroupLayout(ButtonsPane);
         ButtonsPane.setLayout(ButtonsPaneLayout);
@@ -428,7 +487,7 @@ public class MainWindow extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(deleteButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton1)
+                .addComponent(reportButton)
                 .addGap(18, 18, 18)
                 .addComponent(resetButton)
                 .addContainerGap())
@@ -441,7 +500,7 @@ public class MainWindow extends javax.swing.JFrame {
                     .addComponent(saveButton)
                     .addComponent(deleteButton)
                     .addComponent(resetButton)
-                    .addComponent(jButton1))
+                    .addComponent(reportButton))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -534,27 +593,31 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_miAppForActionPerformed
 
     private void miGuideActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miGuideActionPerformed
-        // TODO add your handling code here:
+        if (helpBroker != null) {
+            helpBroker.setDisplayed(true);
+        } else {
+            System.out.println("El sistema de ayuda no está disponible.");
+        }
     }//GEN-LAST:event_miGuideActionPerformed
 
     private void jmClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmClearActionPerformed
-        jTextField1.setText(null);
-        jTextField2.setText(null);
-        jTextField3.setText(null);
-        jTextField5.setText(null);
-        jTextField6.setText(null);
-        jTextField7.setText(null);
-        jTextField8.setText(null);
-        jTextField9.setText(null);
+        tfBuild.setText(null);
+        tfUser.setText(null);
+        tfRam.setText(null);
+        tfCpu.setText(null);
+        tfGpu.setText(null);
+        tfMobo.setText(null);
+        tfPsu.setText(null);
+        tfDisk.setText(null);
     }//GEN-LAST:event_jmClearActionPerformed
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+    private void tfBuildActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tfBuildActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
+    }//GEN-LAST:event_tfBuildActionPerformed
 
-    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
+    private void tfRamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tfRamActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField3ActionPerformed
+    }//GEN-LAST:event_tfRamActionPerformed
 
     private void nextButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextButtonActionPerformed
         currentPage++;
@@ -578,6 +641,11 @@ public class MainWindow extends javax.swing.JFrame {
         NewUserWindow newUser = new NewUserWindow();
         newUser.setVisible(true);
     }//GEN-LAST:event_jmAddUserActionPerformed
+
+    private void reportButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reportButtonActionPerformed
+        ReportWindow reportWindow = new ReportWindow(this);
+        reportWindow.showDialog();
+    }//GEN-LAST:event_reportButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -720,6 +788,43 @@ public class MainWindow extends javax.swing.JFrame {
             loadData();
         });
     }
+
+    private void initHelp() {
+        try {
+            // Obtener el recurso desde el classpath
+            ClassLoader cl = this.getClass().getClassLoader();
+            URL hsURL = cl.getResource("help/help_set.hs");
+
+            if (hsURL == null) {
+                System.out.println("No se encontró el archivo de ayuda en el classpath.");
+                return;
+            }
+
+            System.out.println("Archivo de ayuda encontrado en: " + hsURL);
+
+            // Cargar el HelpSet
+            helpSet = new HelpSet(cl, hsURL);
+            helpBroker = helpSet.createHelpBroker();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void ejecutarF1() {
+        KeyStroke f1KeyStroke = KeyStroke.getKeyStroke("F1");
+        Action helpAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                miGuideActionPerformed(null); // Ejecuta el mismo evento del botón
+            }
+        };
+
+        // Asignar la acción al panel principal (ventana) para que funcione en cualquier parte
+        this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(f1KeyStroke, "help");
+        this.getRootPane().getActionMap().put("help", helpAction);
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel AllPane;
     private javax.swing.JPanel BuildPane;
@@ -734,7 +839,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel TablePane;
     private javax.swing.JPanel UserPane;
     private javax.swing.JButton deleteButton;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -747,14 +851,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField5;
-    private javax.swing.JTextField jTextField6;
-    private javax.swing.JTextField jTextField7;
-    private javax.swing.JTextField jTextField8;
-    private javax.swing.JTextField jTextField9;
     private javax.swing.JMenuItem jmAddPC;
     private javax.swing.JMenuItem jmAddUser;
     private javax.swing.JMenuItem jmClear;
@@ -763,8 +859,17 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem miGuide;
     private javax.swing.JButton nextButton;
     private javax.swing.JButton prevButton;
+    private javax.swing.JButton reportButton;
     private javax.swing.JButton resetButton;
     private javax.swing.JButton saveButton;
     private javax.swing.JTable table;
+    private javax.swing.JTextField tfBuild;
+    private javax.swing.JTextField tfCpu;
+    private javax.swing.JTextField tfDisk;
+    private javax.swing.JTextField tfGpu;
+    private javax.swing.JTextField tfMobo;
+    private javax.swing.JTextField tfPsu;
+    private javax.swing.JTextField tfRam;
+    private javax.swing.JTextField tfUser;
     // End of variables declaration//GEN-END:variables
 }

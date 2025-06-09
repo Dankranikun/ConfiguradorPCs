@@ -4,11 +4,14 @@
  */
 package view;
 
+import java.awt.event.ActionEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import util.DatabaseConnection;
 
 /**
@@ -25,6 +28,20 @@ public class LoginWindow extends javax.swing.JFrame {
     public LoginWindow() {
         initComponents();
         setLocationRelativeTo(null);
+
+        // Añadir ActionListener para la tecla Enter en usernameTF
+        usernameTF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loginBut.doClick();
+            }
+        });
+
+        // Añadir ActionListener para la tecla Enter en passwdTF
+        passwdTF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loginBut.doClick();
+            }
+        });
     }
 
     /**
@@ -123,39 +140,7 @@ public class LoginWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_clearButActionPerformed
 
     private void loginButActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButActionPerformed
-        String username = usernameTF.getText().trim();
-        char[] passwordChars = passwdTF.getPassword();
-        String password = new String(passwordChars).trim();
-
-        // Depuración: Imprimir los valores exactos
-        System.out.println("Intentando autenticar: username='" + username + "', passwordChars.length=" + passwordChars.length + ", password='" + password + "'");
-
-        if (username.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Por favor, completa todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement("SELECT id FROM usuarios WHERE nombre = ? AND contraseña = ?")) {
-
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                userId = rs.getInt("id");
-                System.out.println("Autenticación exitosa para userId: " + userId);
-
-                dispose(); // Cerrar la ventana de login
-                MainWindow mainWindow = new MainWindow();
-                mainWindow.setVisible(true);
-            } else {
-                System.out.println("No se encontró usuario con esas credenciales. Verificando datos en DB...");
-                JOptionPane.showMessageDialog(this, "Nombre de usuario o contraseña incorrectos.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al autenticar: " + e.getMessage());
-            JOptionPane.showMessageDialog(this, "Error al conectar con la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        loginPulsado();
     }//GEN-LAST:event_loginButActionPerformed
 
     /**
@@ -191,6 +176,42 @@ public class LoginWindow extends javax.swing.JFrame {
                 new LoginWindow().setVisible(true);
             }
         });
+    }
+
+    public void loginPulsado() {
+        String username = usernameTF.getText().trim();
+        char[] passwordChars = passwdTF.getPassword();
+        String password = new String(passwordChars).trim();
+
+        // Depuración: Imprimir los valores exactos
+        System.out.println("Intentando autenticar: username='" + username + "', passwordChars.length=" + passwordChars.length + ", password='" + password + "'");
+
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor, completa todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement("SELECT id FROM usuarios WHERE nombre = ? AND contraseña = ?")) {
+
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                userId = rs.getInt("id");
+                System.out.println("Autenticación exitosa para userId: " + userId);
+
+                dispose(); // Cerrar la ventana de login
+                MainWindow mainWindow = new MainWindow();
+                mainWindow.setVisible(true);
+            } else {
+                System.out.println("No se encontró usuario con esas credenciales. Verificando datos en DB...");
+                JOptionPane.showMessageDialog(this, "Nombre de usuario o contraseña incorrectos.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al autenticar: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Error al conectar con la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
