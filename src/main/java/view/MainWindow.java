@@ -142,7 +142,6 @@ public class MainWindow extends javax.swing.JFrame {
         jmComponent = new javax.swing.JMenuItem();
         jmClear = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
-        miAppFor = new javax.swing.JMenuItem();
         miGuide = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -467,6 +466,11 @@ public class MainWindow extends javax.swing.JFrame {
         saveButton.setText("Save edit");
 
         deleteButton.setText("Delete build");
+        deleteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteButtonActionPerformed(evt);
+            }
+        });
 
         resetButton.setText("Discard changes");
 
@@ -517,6 +521,11 @@ public class MainWindow extends javax.swing.JFrame {
 
         jmAddPC.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         jmAddPC.setText("Add new PC");
+        jmAddPC.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmAddPCActionPerformed(evt);
+            }
+        });
         jMenu1.add(jmAddPC);
 
         jmComponent.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_B, java.awt.event.InputEvent.CTRL_DOWN_MASK));
@@ -540,14 +549,6 @@ public class MainWindow extends javax.swing.JFrame {
         jMenuBar1.add(jMenu1);
 
         jMenu2.setText("Help");
-
-        miAppFor.setText("What is the app for");
-        miAppFor.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                miAppForActionPerformed(evt);
-            }
-        });
-        jMenu2.add(miAppFor);
 
         miGuide.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0));
         miGuide.setText("Guide");
@@ -587,10 +588,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void miAppForActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miAppForActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_miAppForActionPerformed
 
     private void miGuideActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miGuideActionPerformed
         if (helpBroker != null) {
@@ -646,6 +643,15 @@ public class MainWindow extends javax.swing.JFrame {
         ReportWindow reportWindow = new ReportWindow(this);
         reportWindow.showDialog();
     }//GEN-LAST:event_reportButtonActionPerformed
+
+    private void jmAddPCActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmAddPCActionPerformed
+        CreateBuildWindow createBuild = new CreateBuildWindow();
+        createBuild.setVisible(true);
+    }//GEN-LAST:event_jmAddPCActionPerformed
+
+    private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_deleteButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -855,7 +861,6 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem jmAddUser;
     private javax.swing.JMenuItem jmClear;
     private javax.swing.JMenuItem jmComponent;
-    private javax.swing.JMenuItem miAppFor;
     private javax.swing.JMenuItem miGuide;
     private javax.swing.JButton nextButton;
     private javax.swing.JButton prevButton;
